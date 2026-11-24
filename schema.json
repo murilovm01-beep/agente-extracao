@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "description": "Formulario de Quality Assessment e Data Extraction do mapeamento sistematico sobre interpretacao de linguagem natural em cenas 3D. Fonte unica dos valores permitidos: salvar_extracao.py, estatisticas.py e concordancia.py leem este arquivo. Os valores de escolha sao o texto exato cadastrado no Parsif.al.",
+
+  "metadata": {
+    "title":   {"type": "text", "required": true, "max_length": 500},
+    "authors": {"type": "list", "required": true, "min_items": 1},
+    "venue":   {"type": "text", "required": true, "max_length": 300},
+    "doi":     {"type": "text", "required": false, "nullable": true, "max_length": 100,
+                "note": "So o DOI que aparece no PDF. Nunca deduzir."},
+    "year":    {"type": "integer", "required": true, "min": 2020, "max": 2026,
+                "note": "Ano da versao publicada (citacao oficial), nao do arXiv."}
+  },
+
+  "qa": {
+    "threshold": 3.5,
+    "review_band": [3.0, 3.5],
+    "max_score": 7.0,
+    "answer_weights": {"Sim": 1.0, "Parcialmente": 0.5, "Não": 0.0},
+    "manual_value": "necessita_verificacao_manual",
+    "justification_policy": {
+      "Sim": "forbidden",
+      "Não": "forbidden",
+      "Parcialmente": "optional",
+      "necessita_verificacao_manual": "required"
+    },
+    "justification_max_length": {
+      "Parcialmente": 150,
+      "necessita_verificacao_manual": 400
+    },
+    "items": [
+      {"id": "QA1", "short": "Problema e objetivo", "question": "O problema e o objetivo do estudo estão claramente definidos?"},
+      {"id": "QA2", "short": "Reimplementável", "question": "O método ou o benchmark está descrito com detalhe suficiente para ser reimplementado?"},
+      {"id": "QA3", "short": "Dados públicos e split", "question": "A avaliação usa dados públicos e identifica o split utilizado?"},
+      {"id": "QA4", "short": "Comparação sob o mesmo protocolo", "question": "Os resultados são comparados com linhas de base sob o mesmo protocolo de avaliação?"},
+      {"id": "QA5", "short": "Código disponível", "question": "O código-fonte está disponível publicamente?"},
+      {"id": "QA6", "short": "Dados e pesos acessíveis", "question": "Os dados, pesos e demais artefatos necessários para reproduzir estão acessíveis (links funcionando na data da extração)?"},
+      {"id": "QA7", "short": "Limitações discutidas", "question": "As limitações do estudo são discutidas?"}
+    ]
+  },
+
+  "extraction": {
+    "fields": [
+      {"id": "E01", "label": "Tipo de contribuição", "type": "single",
+       "values": ["Método", "Benchmark ou conjunto de dados", "Método e benchmark", "Estudo de avaliação comparativa"]},
+
+      {"id": "E02", "label": "Tarefa principal", "type": "single", "other_value": "Outra",
+       "values": ["Grounding referencial de objeto único", "Grounding de múltiplos objetos", "Raciocínio ou QA espacial", "Grounding com execução de ação", "Outra"]},
+
+      {"id": "E03", "label": "Saída produzida", "type": "single",
+       "values": ["Caixa delimitadora 3D", "Identificador do objeto", "Máscara ou segmentação 3D", "Resposta textual", "Ação ou trajetória", "Não se aplica"]},
+
+      {"id": "E04", "label": "Regime de treinamento", "type": "single",
+       "values": ["Zero-shot puro", "Otimizado por exemplos", "Treinado ou ajustado (fine-tuning)", "Não se aplica"]},
+
+      {"id": "E05", "label": "Modalidade primária de entrada", "type": "multi",
+       "values": ["Nuvem de pontos", "Malha ou reconstrução 3D", "Imagens RGB ou RGB-D multivista", "Imagem única", "Caixas 3D ou objetos pré-detectados", "Grafo de cena"]},
+
+      {"id": "E06", "label": "Origem das vistas usadas", "type": "single",
+       "values": ["Vistas reais (capturadas)", "Vistas renderizadas", "Ambas", "Não se aplica"]},
+
+      {"id": "E07", "label": "Modelos de percepção pré-treinados de que depende", "type": "multi",
+       "exclusive_values": ["Nenhum"],
+       "values": ["Detector ou segmentador 3D", "Segmentador 2D", "Detector de vocabulário aberto", "Codificador visão-linguagem", "Nenhum"]},
+
+      {"id": "E08", "label": "Depende de modelo ou API proprietária?", "type": "boolean"},
+
+      {"id": "E09", "label": "LLM/VLM utilizado(s)", "type": "text", "max_length": 300,
+       "hint": "nome e versão; 'nenhum' se não usa"},
+
+      {"id": "E10", "label": "Custo computacional reportado", "type": "text", "max_length": 300,
+       "hint": "tempo, tokens ou chamadas por consulta; 'não reportado'; 'não se aplica' em benchmark"},
+
+      {"id": "E11", "label": "Passada única ou iterativo", "type": "single",
+       "values": ["Passada única", "Iterativo, com raciocínio rastreável", "Iterativo, sem rastreabilidade declarada", "Não se aplica"]},
+
+      {"id": "E12", "label": "Tratamento de ambiguidade referencial", "type": "multi",
+       "exclusive_values": ["Não trata"],
+       "values": ["Distratores da mesma classe", "Expressões ordinais ou compostas", "Detecção de referência inexistente", "Não trata"]},
+
+      {"id": "E13", "label": "Tratamento de ponto de vista", "type": "single",
+       "values": ["Módulo dedicado", "Avaliado em separado (dependente/independente de ponto de vista)", "Não trata", "Não se aplica"]},
+
+      {"id": "E14", "label": "Mecanismo de grounding", "type": "single", "other_value": "Outro",
+       "values": ["Modelo treinado fim a fim", "Programa ou código gerado por LLM com executor geométrico", "Agente VLM sobre vistas 2D", "Grafo de cena com raciocínio por LLM ou VLM", "Outro", "Não se aplica"]},
+
+      {"id": "E15", "label": "Raciocínio espacial", "type": "single",
+       "values": ["Implícito", "Explícito", "Híbrido", "Não se aplica"]},
+
+      {"id": "E16", "label": "Benchmarks e conjuntos de dados usados", "type": "multi", "other_value": "Outro",
+       "exclusive_values": ["Não se aplica"], "review_values": ["Não se aplica"],
+       "values": ["ScanRefer", "Nr3D", "Sr3D", "Multi3DRefer", "ScanQA", "SQA3D", "3DSRBench", "IRef-VLA", "Outro", "Não se aplica"]},
+
+      {"id": "E17", "label": "Caixas/rótulos na avaliação", "type": "single",
+       "values": ["Preditos", "Ground truth", "Ambos, reportados em separado", "Não informado", "Não se aplica"]},
+
+      {"id": "E18", "label": "Resultado principal reportado", "type": "text", "max_length": 400,
+       "hint": "valor, métrica e benchmark; só descritivo"},
+
+      {"id": "E19", "label": "Limitações declaradas e evidência de ablação", "type": "text", "max_length": 500},
+
+      {"id": "E20", "label": "Ano de publicação", "type": "single", "auto_from": "metadata.year",
+       "values": ["2020", "2021", "2022", "2023", "2024", "2025", "2026"]}
+    ],
+    "chart_fields": ["E01", "E02", "E03", "E04", "E05", "E06", "E07", "E08", "E11", "E12", "E13", "E14", "E15", "E16", "E17", "E20"],
+    "descriptive_fields": ["E09", "E10", "E18", "E19"],
+    "method_only_fields": ["E04", "E11", "E14", "E15"],
+    "image_modalities": ["Imagem única", "Imagens RGB ou RGB-D multivista"],
+    "llm_based_mechanisms": ["Programa ou código gerado por LLM com executor geométrico", "Agente VLM sobre vistas 2D", "Grafo de cena com raciocínio por LLM ou VLM"],
+    "proprietary_model_pattern": "gpt[- ]?[345o]|chatgpt|gemini|claude|grounding[- ]?dino[- ]?1\\.5|dino-x|palm|o1\\b|o3\\b"
+  },
+
+  "article": {
+    "confidence_values": ["alta", "média", "baixa"],
+    "notes_max_length": 150,
+    "notes_notable_max_length": 600,
+    "other_text_max_length": 200,
+    "eligibility_reason_max_length": 200,
+    "uncertain_field_ids_extra": ["title", "authors", "venue", "doi", "year"]
+  },
+
+  "rules": {
+    "errors": {
+      "R01": "Valor de escolha fora da lista permitida, ou valor repetido em campo de múltipla escolha.",
+      "R02": "Valor exclusivo combinado com outros: 'Nenhum' (E07), 'Não trata' (E12), 'Não se aplica' (E16).",
+      "R03": "'Outra' (E02) e 'Outro' (E14, E16) exigem texto em other_texts; other_texts só existe para esses campos.",
+      "R04": "Campo vazio (null) só é aceito se estiver em uncertain_fields.",
+      "R05": "E20 é preenchido pelo script a partir de metadata.year; se vier no rascunho, precisa ser igual.",
+      "R06": "Justificativa de QA: proibida em Sim/Não; opcional e curta em Parcialmente; obrigatória em necessita_verificacao_manual.",
+      "R07": "Item necessita_verificacao_manual exige provisional_value (Sim, Parcialmente ou Não).",
+      "R08": "Extração obrigatória quando a nota máxima possível >= 3,5; proibida quando < 3,5.",
+      "R09": "notes até 150 caracteres; até 600 só com notable = true.",
+      "R10": "Campos de texto não podem ficar vazios e respeitam o tamanho máximo.",
+      "R11": "confidence em {alta, média, baixa}; uncertain_fields só com identificadores válidos, sem repetição.",
+      "R12": "Metadados obrigatórios; ano entre 2020 e 2026.",
+      "R13": "id, arquivo e hash do rascunho precisam ser os do artigo em andamento.",
+      "R14": "model (modelo que fez a extração) obrigatório."
+    },
+    "warnings": {
+      "W01": "Benchmark puro ou estudo de avaliação com E04/E11/E14/E15 diferente de 'Não se aplica'.",
+      "W02": "Método com E04/E11/E14/E15 = 'Não se aplica'.",
+      "W03": "E06 incoerente com E05 (vistas sem modalidade de imagem, ou imagem sem origem das vistas).",
+      "W04": "E09 cita modelo proprietário e E08 = false (artigos de método).",
+      "W05": "E09 = 'nenhum' com mecanismo baseado em LLM/VLM em E14.",
+      "W06": "E17 = 'Não se aplica' em artigo de método que usa benchmarks.",
+      "W07": "confidence = 'alta' com campos incertos."
+    }
+  }
+}

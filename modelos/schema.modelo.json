@@ -1,0 +1,106 @@
+{
+  "$comment": "MODELO DE SCHEMA. Copie para a raiz como schema.json e adapte à sua revisão. As chaves que começam com $comment são só explicação e são ignoradas pelos scripts. Este modelo usa um tema fictício (LLMs no ensino de programação) para que cada tipo de campo apareça com um exemplo real.",
+
+  "schema_version": "1.0",
+  "description": "Formulário de Quality Assessment e extração da revisão sobre LLMs no ensino de programação (exemplo).",
+
+  "metadata": {
+    "$comment": "Metadados bibliográficos que o agente preenche em todo artigo. Normalmente só o intervalo de anos (year.min / year.max) precisa mudar.",
+    "title":   {"type": "text", "required": true, "max_length": 500},
+    "authors": {"type": "list", "required": true, "min_items": 1},
+    "venue":   {"type": "text", "required": true, "max_length": 300},
+    "doi":     {"type": "text", "required": false, "nullable": true, "max_length": 100, "note": "Só o DOI que aparece no PDF. Nunca deduzir."},
+    "year":    {"type": "integer", "required": true, "min": 2018, "max": 2026, "note": "Ano da versão publicada."}
+  },
+
+  "qa": {
+    "$comment": "Avaliação de qualidade. Cada item recebe Sim (1), Parcialmente (0,5) ou Não (0). Se a nota MÁXIMA possível for >= threshold, o artigo segue para a extração. Artigos com nota dentro de review_band vão para a fila de revisão humana.",
+    "threshold": 2.0,
+    "review_band": [1.5, 2.0],
+    "max_score": 4.0,
+    "answer_weights": {"Sim": 1.0, "Parcialmente": 0.5, "Não": 0.0},
+
+    "$comment_manual": "Valor que o agente usa quando não consegue conferir algo sozinho (ex.: um link). Você confere depois com 'sobrescrever-qa'.",
+    "manual_value": "necessita_verificacao_manual",
+
+    "justification_policy": {"Sim": "forbidden", "Não": "forbidden", "Parcialmente": "optional", "necessita_verificacao_manual": "required"},
+    "justification_max_length": {"Parcialmente": 150, "necessita_verificacao_manual": 400},
+
+    "items": [
+      {"id": "QA1", "short": "Objetivo claro",       "question": "O objetivo do estudo está claramente definido?"},
+      {"id": "QA2", "short": "Método descrito",      "question": "O método ou a intervenção está descrito com detalhe suficiente para ser replicado?"},
+      {"id": "QA3", "short": "Avaliação com alunos", "question": "A avaliação envolve estudantes reais, com número de participantes informado?"},
+      {"id": "QA4", "short": "Limitações",           "question": "As limitações do estudo são discutidas?"}
+    ]
+  },
+
+  "extraction": {
+    "$comment": "Campos do formulário de extração. Tipos: single (escolha única), multi (múltipla escolha), boolean (true/false), text (texto livre). Os valores de escolha precisam ser escritos aqui exatamente como o agente deve usá-los, com acentos.",
+
+    "fields": [
+      {"id": "E01", "label": "Tipo de estudo", "type": "single",
+       "$comment": "other_value: a opção 'Outro' exige uma descrição curta em other_texts.",
+       "other_value": "Outro",
+       "values": ["Experimento controlado", "Estudo de caso", "Survey ou questionário", "Ferramenta ou protótipo", "Outro"]},
+
+      {"id": "E02", "label": "Nível de ensino", "type": "single",
+       "values": ["Ensino médio ou técnico", "Graduação", "Pós-graduação", "Curso livre ou MOOC", "Não informado"]},
+
+      {"id": "E03", "label": "Linguagens de programação ensinadas", "type": "multi",
+       "$comment": "exclusive_values: 'Não informado' não pode vir junto com outras opções.",
+       "other_value": "Outra",
+       "exclusive_values": ["Não informado"],
+       "values": ["Python", "Java", "C ou C++", "JavaScript", "Outra", "Não informado"]},
+
+      {"id": "E04", "label": "Usa modelo ou API proprietária?", "type": "boolean"},
+
+      {"id": "E05", "label": "Modelo(s) usado(s)", "type": "text", "max_length": 300,
+       "hint": "nome e versão; 'não informado' se o artigo não diz"},
+
+      {"id": "E06", "label": "Resultado principal", "type": "text", "max_length": 400,
+       "hint": "só descritivo, com o número que o artigo reporta"},
+
+      {"id": "E07", "label": "Ano de publicação", "type": "single",
+       "$comment": "auto_from: preenchido pelo script a partir de metadata.year. O agente não mexe neste campo.",
+       "auto_from": "metadata.year",
+       "values": ["2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026"]}
+    ],
+
+    "$comment_charts": "chart_fields viram um gráfico de barras cada no relatório de estatísticas. descriptive_fields (texto livre) aparecem como tabela. Os cruzamentos entre campos do relatório de exemplo são específicos do mapeamento original e não aparecem com outro schema.",
+    "chart_fields": ["E01", "E02", "E03", "E04", "E07"],
+    "descriptive_fields": ["E05", "E06"]
+  },
+
+  "article": {
+    "$comment": "Regras gerais do rascunho de cada artigo. Pode deixar como está.",
+    "confidence_values": ["alta", "média", "baixa"],
+    "notes_max_length": 150,
+    "notes_notable_max_length": 600,
+    "other_text_max_length": 200,
+    "eligibility_reason_max_length": 200,
+    "uncertain_field_ids_extra": ["title", "authors", "venue", "doi", "year"]
+  },
+
+  "rules": {
+    "$comment": "Só documentação: os códigos que o validador mostra quando recusa um rascunho. Não precisa mudar.",
+    "errors": {
+      "R01": "Valor de escolha fora da lista permitida, ou repetido em múltipla escolha.",
+      "R02": "Valor exclusivo combinado com outros.",
+      "R03": "Opção 'Outro/Outra' sem texto em other_texts.",
+      "R04": "Campo vazio (null) só é aceito se estiver em uncertain_fields.",
+      "R05": "Campo de ano diferente de metadata.year.",
+      "R06": "Justificativa de QA fora da política.",
+      "R07": "Item de verificação manual sem provisional_value.",
+      "R08": "Extração obrigatória quando a nota máxima >= threshold; proibida abaixo.",
+      "R09": "notes acima do limite.",
+      "R10": "Texto vazio ou acima do tamanho máximo.",
+      "R11": "confidence ou uncertain_fields inválidos.",
+      "R12": "Metadados obrigatórios ausentes ou ano fora do intervalo.",
+      "R13": "Rascunho não corresponde ao artigo em andamento.",
+      "R14": "model (modelo que fez a extração) obrigatório."
+    },
+    "warnings": {
+      "W07": "confidence = 'alta' com campos incertos."
+    }
+  }
+}

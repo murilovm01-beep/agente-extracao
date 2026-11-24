@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "CLAUDE_CODE_FORK_SUBAGENT": "0",
+    "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(py salvar_extracao.py *)",
+      "Bash(python salvar_extracao.py *)",
+      "Bash(python3 salvar_extracao.py *)",
+      "Bash(py ler_pdf.py *)",
+      "Bash(python ler_pdf.py *)",
+      "Bash(python3 ler_pdf.py *)",
+      "Bash(py verificar_link.py *)",
+      "Bash(python verificar_link.py *)",
+      "Bash(python3 verificar_link.py *)",
+      "Edit(/trabalho/**)"
+    ],
+    "deny": [
+      "Edit(/resultados/**)",
+      "Edit(/estado.json)",
+      "Edit(/schema.json)",
+      "Edit(/CLAUDE.md)",
+      "Edit(/artigos/**)",
+      "Edit(/relatorios/**)",
+      "Edit(/conferencia/**)",
+      "Edit(/.claude/**)",
+      "Edit(/*.py)",
+      "Bash(py salvar_extracao.py sobrescrever-qa *)",
+      "Bash(python salvar_extracao.py sobrescrever-qa *)",
+      "Bash(python3 salvar_extracao.py sobrescrever-qa *)",
+      "Bash(py salvar_extracao.py corrigir *)",
+      "Bash(python salvar_extracao.py corrigir *)",
+      "Bash(python3 salvar_extracao.py corrigir *)",
+      "Bash(py salvar_extracao.py reabrir *)",
+      "Bash(python salvar_extracao.py reabrir *)",
+      "Bash(python3 salvar_extracao.py reabrir *)",
+      "Bash(py salvar_extracao.py retomar-pulado *)",
+      "Bash(python salvar_extracao.py retomar-pulado *)",
+      "Bash(python3 salvar_extracao.py retomar-pulado *)",
+      "Bash(py concordancia.py *)",
+      "Bash(python concordancia.py *)",
+      "Bash(python3 concordancia.py *)",
+      "Bash(rm *)",
+      "Bash(mv *)",
+      "WebFetch",
+      "WebSearch"
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+# Dados de cada usuário: nunca vão para o repositório
+artigos/*
+trabalho/*
+resultados/*
+relatorios/*
+conferencia/*
+estado.json
+
+# Mantém as pastas vazias no repositório
+!artigos/.gitkeep
+!trabalho/.gitkeep
+!resultados/.gitkeep
+!relatorios/.gitkeep
+!conferencia/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Configuração local do Claude Code (não versionar)
+.claude/settings.local.json
+
+# Sistema
+.DS_Store
+Thumbs.db
